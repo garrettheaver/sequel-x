@@ -1,9 +1,9 @@
 require 'spec_helper'
-require 'sequel/plugins/cti'
+require 'sequel/plugins/x_cti'
 
 module Sequel
   module Plugins
-    describe Cti do
+    describe XCti do
 
       #        RT
       #       /  \
@@ -47,7 +47,7 @@ module Sequel
       db[:b1s].insert({ id: 4, b1: 'B1' })
 
       class ::RT < Sequel::Model(db)
-        plugin :cti, key: :fk,
+        plugin :x_cti, key: :fk,
           map: { 1 => self, 2 => 'A1', 3 => 'A2', 4 => 'B1' }
       end
 

@@ -1,6 +1,6 @@
 module Sequel
   module Plugins
-    module Cti
+    module XCti
 
       def self.apply(model, opts={})
         model.plugin :lazy_attributes
