@@ -62,7 +62,7 @@ module Sequel
           let(:instances) { RT.all }
 
           it 'loads all instance types' do
-            instances.map(&:class).should === [RT, A1, A2, B1]
+            assert_equal [RT, A1, A2, B1], instances.map(&:class)
           end
 
           it 'loads the correct attributes for each instance' do
@@ -76,13 +76,13 @@ module Sequel
 
         context 'via intermediate class' do
           it 'loads instances of that type and subclasses' do
-            A1.all.map(&:class).should == [A1, B1]
+            assert_equal [A1, B1], A1.all.map(&:class)
           end
         end
 
         context 'via leaf class' do
           it 'only loads instances of that type' do
-            B1.all.map(&:class).should == [B1]
+            assert_equal [B1], B1.all.map(&:class)
           end
         end
 
