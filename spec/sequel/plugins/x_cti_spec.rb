@@ -26,7 +26,7 @@ module Sequel
 
       db.create_table(:a1s) do
         foreign_key :id, :rts, primary_key: true
-        String :a1
+        String :a1, null: false
       end
 
       db[:a1s].insert({ id: 2, a1: 'A1' })
@@ -34,14 +34,14 @@ module Sequel
 
       db.create_table(:a2s) do
         foreign_key :id, :rts, primary_key: true
-        String :a2
+        String :a2, null: false
       end
 
       db[:a2s].insert({ id: 3, a2: 'A2' })
 
       db.create_table(:b1s) do
         foreign_key :id, :a1s, primary_key: true
-        String :b1
+        String :b1, null: false
       end
 
       db[:b1s].insert({ id: 4, b1: 'B1' })

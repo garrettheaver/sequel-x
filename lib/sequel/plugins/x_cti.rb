@@ -56,9 +56,11 @@ module Sequel
 
           cti[:tables].each do |tbl|
             val = cti_values(tbl)
-            val = { primary_key => key }.merge(val) unless key.nil?
+            next if val.empty?
 
-            rtn = model.db.from(tbl).insert(val) unless val.empty?
+            val[primary_key] = key if key
+            rtn = model.db.from(tbl).insert(val)
+
             key ||= rtn
           end
 
