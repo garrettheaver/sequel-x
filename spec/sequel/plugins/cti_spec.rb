@@ -26,7 +26,7 @@ module Sequel
 
       db.create_table(:a1s) do
         foreign_key :id, :rts, primary_key: true
-        String :a1, null: false
+        String :a1
       end
 
       db[:a1s].insert({ id: 2, a1: 'A1' })
@@ -34,14 +34,14 @@ module Sequel
 
       db.create_table(:a2s) do
         foreign_key :id, :rts, primary_key: true
-        String :a2, null: false
+        String :a2
       end
 
       db[:a2s].insert({ id: 3, a2: 'A2' })
 
       db.create_table(:b1s) do
         foreign_key :id, :a1s, primary_key: true
-        String :b1, null: false
+        String :b1
       end
 
       db[:b1s].insert({ id: 4, b1: 'B1' })
@@ -90,9 +90,55 @@ module Sequel
 
       describe 'INSERT' do
 
+        let(:rt) { RT.create(rt: 'A').reload }
+        let(:a1) { A1.create(rt: 'B', a1: 'C').reload }
+        let(:b1) { B1.create(rt: 'D', a1: 'E', b1: 'F').reload }
+
         it 'creates instances with the correct type value' do
-          RT.create(rt: 'NEW').fk.should == 1
-          A1.create(rt: 'NEW').fk.should == 2
+          assert_equal 1, rt.fk
+          assert_equal 2, a1.fk
+        end
+
+        context 'when base class' do
+          it 'saves the instance attributes' do
+            assert_equal 'A', rt.rt
+          end
+        end
+
+        context 'when a subclass' do
+          it 'saves the attributes for each table' do
+            assert_equal 'D', b1.rt
+            assert_equal 'E', b1.a1
+            assert_equal 'F', b1.b1
+          end
+        end
+
+      end
+
+      describe 'DELETE' do
+
+        let(:b1) { B1.create(rt: 'D', a1: 'E', b1: 'F').delete }
+
+        it 'removes the record from all associated tables' do
+          assert_equal [], db[:rts].where(:id => b1.pk).all
+          assert_equal [], db[:a1s].where(:id => b1.pk).all
+          assert_equal [], db[:b1s].where(:id => b1.pk).all
+        end
+
+      end
+
+      describe 'UPDATE' do
+
+        let(:b1) { B1.create(rt: 'D', a1: 'E', b1: 'F') }
+
+        before(:each) do
+          b1.update(rt: 'G', a1: 'H', b1: 'I').reload
+        end
+
+        it 'updates the attributes in the associated tables' do
+          assert_equal 'G', b1.rt
+          assert_equal 'H', b1.a1
+          assert_equal 'I', b1.b1
         end
 
       end

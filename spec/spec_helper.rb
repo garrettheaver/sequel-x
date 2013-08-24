@@ -5,5 +5,7 @@ $:.unshift(lib) unless $:.include?(lib)
 
 RSpec::configure do |c|
   c.expect_with :stdlib, :rspec
+  c.run_all_when_everything_filtered = true
+  c.filter_run :only => true
 end
 
