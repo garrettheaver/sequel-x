@@ -27,6 +27,7 @@ module Sequel
       db.create_table(:a1s) do
         foreign_key :id, :rts, primary_key: true
         String :a1, null: false
+        String :ax
       end
 
       db[:a1s].insert({ id: 2, a1: 'A1' })
@@ -35,6 +36,7 @@ module Sequel
       db.create_table(:a2s) do
         foreign_key :id, :rts, primary_key: true
         String :a2, null: false
+        String :ax
       end
 
       db[:a2s].insert({ id: 3, a2: 'A2' })
@@ -91,7 +93,7 @@ module Sequel
       describe 'INSERT' do
 
         let(:rt) { RT.create(rt: 'A').reload }
-        let(:a1) { A1.create(rt: 'B', a1: 'C').reload }
+        let(:a1) { A1.create(rt: 'B', a1: 'C', ax: 'X').reload }
         let(:b1) { B1.create(rt: 'D', a1: 'E', b1: 'F').reload }
 
         it 'creates instances with the correct type value' do
@@ -106,11 +108,17 @@ module Sequel
         end
 
         context 'when a subclass' do
+
           it 'saves the attributes for each table' do
             assert_equal 'D', b1.rt
             assert_equal 'E', b1.a1
             assert_equal 'F', b1.b1
           end
+
+          it 'does not insert records into unrelated tables of the tree' do
+            assert_equal [], db[:a2s].where(:id => a1.pk).all
+          end
+
         end
 
       end

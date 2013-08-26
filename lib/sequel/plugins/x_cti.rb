@@ -7,7 +7,8 @@ module Sequel
       end
 
       def self.configure(model, opts={})
-        cti = { base: model, tables: [model.table_name] }.merge(opts)
+        tables = [model.table_name].freeze
+        cti = { base: model, tables: tables }.merge(opts)
         model.instance_variable_set(:@cti, cti)
 
         model.instance_eval do
@@ -21,12 +22,13 @@ module Sequel
       module ClassMethods
 
         def inherited(subclass)
-          parent, join_using, cti = self, primary_key, @cti
-          subclass.instance_variable_set(:@cti, cti)
+          parent, join_using, opt = self, primary_key, @cti
 
           subclass.instance_eval do
             table = implicit_table_name
-            cti[:tables] << table
+
+            @cti = opt.dup
+            @cti[:tables] = (opt[:tables].dup << table).freeze
 
             set_dataset(parent.dataset.join(table, [join_using]))
             dataset.row_proc = parent.dataset.row_proc
