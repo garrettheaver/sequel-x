@@ -7,8 +7,10 @@ module Sequel
       end
 
       def self.configure(model, opts={})
-        tables = [model.table_name].freeze
-        cti = { base: model, tables: tables }.merge(opts)
+        tbl = model.table_name
+        col = model.dataset.db.from(tbl).columns
+
+        cti = { base: model, tables: { tbl => col } }.merge(opts)
         model.instance_variable_set(:@cti, cti)
 
         model.instance_eval do
@@ -25,16 +27,16 @@ module Sequel
           parent, join_using, opt = self, primary_key, @cti
 
           subclass.instance_eval do
-            table = implicit_table_name
+            tbl = implicit_table_name
 
-            @cti = opt.dup
-            @cti[:tables] = (opt[:tables].dup << table).freeze
-
-            set_dataset(parent.dataset.join(table, [join_using]))
+            set_dataset(parent.dataset.join(tbl, [join_using]))
             dataset.row_proc = parent.dataset.row_proc
 
-            columns = dataset.db.from(table).columns
-            columns.each { |c| define_lazy_attribute_getter(c) }
+            col = dataset.db.from(tbl).columns
+            col.each { |c| define_lazy_attribute_getter(c) }
+
+            @cti = opt.dup
+            @cti[:tables] = @cti[:tables].dup.merge({ tbl => col })
           end
 
           super
@@ -55,13 +57,14 @@ module Sequel
         def _insert
           key = values[primary_key]
 
-          cti[:tables].each do |tbl|
-            val = cti_values(tbl)
+          cti[:tables].keys.each do |tbl|
+            col = cti[:tables][tbl]
+            val = values.select{ |k,v| col.include?(k) }
+
             next if val.empty?
-
             val[primary_key] = key if key
-            rtn = model.db.from(tbl).insert(val)
 
+            rtn = model.db.from(tbl).insert(val)
             key ||= rtn
           end
 
@@ -69,22 +72,18 @@ module Sequel
         end
 
         def _update(columns)
-          cti[:tables].reverse.each do |tbl|
-            val = cti_values(tbl)
+          cti[:tables].keys.reverse.each do |tbl|
+            col = cti[:tables][tbl]
+            val = values.select{ |k,v| col.include?(k) }
             model.db.from(tbl).where(primary_key => pk).
               update(val) unless val.empty?
           end
         end
 
         def _delete
-          cti[:tables].reverse.each do |tbl|
+          cti[:tables].keys.reverse.each do |tbl|
             model.db.from(tbl).where(primary_key => pk).delete
           end
-        end
-
-        def cti_values(table)
-          columns = model.db.from(table).columns
-          values.select{ |k,v| columns.include?(k) }
         end
 
         def cti
