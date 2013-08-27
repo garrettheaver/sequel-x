@@ -35,7 +35,6 @@ module Sequel
 
             columns = dataset.db.from(table).columns
             columns.each { |c| define_lazy_attribute_getter(c) }
-            set_columns(columns)
           end
 
           super
