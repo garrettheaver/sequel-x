@@ -55,20 +55,19 @@ module Sequel
         private
 
         def _insert
-          key = values[primary_key]
+          prk = values[primary_key]
 
-          cti[:tables].keys.each do |tbl|
-            col = cti[:tables][tbl]
+          cti[:tables].each do |tbl, col|
             val = values.select{ |k,v| col.include?(k) }
 
             next if val.empty?
-            val[primary_key] = key if key
-
+            val[primary_key] = prk if prk
             rtn = model.db.from(tbl).insert(val)
-            key ||= rtn
+
+            prk ||= rtn
           end
 
-          values[primary_key] = key
+          values[primary_key] = prk
         end
 
         def _update(columns)
