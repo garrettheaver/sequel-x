@@ -60,7 +60,7 @@ module Sequel
           cti[:tables].each do |tbl, col|
             val = values.select{ |k,v| col.include?(k) }
 
-            val[primary_key] ||= prk
+            val[primary_key] = prk if prk
             rtn = model.db.from(tbl).insert(val)
 
             prk ||= rtn

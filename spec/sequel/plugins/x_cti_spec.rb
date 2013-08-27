@@ -14,7 +14,7 @@ module Sequel
       def self.build_tables(db)
 
         db.create_table(:rts) do
-          primary_key :id, auto_increment: false
+          primary_key :id, auto_increment: true
           Integer :fk, null: false
           String :rt, null: false
         end
@@ -54,7 +54,7 @@ module Sequel
 
       end
 
-      db = Sequel.sqlite
+      db = Sequel::sqlite
 
       build_tables(db)
       build_models(db)
@@ -110,7 +110,7 @@ module Sequel
 
         context 'when base class' do
           it 'saves the instance attributes' do
-            rt = RT.create(rt: 'A')
+            rt = RT.create(rt: 'A').reload
             assert_equal 'A', rt.rt
           end
         end
@@ -118,7 +118,7 @@ module Sequel
         context 'when a subclass' do
 
           it 'saves the correct attributes into each related table' do
-            b1 = B1.create(rt: 'X', a1: 'Y', b1: 'Z')
+            b1 = B1.create(rt: 'X', a1: 'Y', b1: 'Z').reload
             assert_equal ['X', 'Y', 'Z'], [b1.rt, b1.a1, b1.b1]
           end
 
