@@ -27,7 +27,7 @@ module Sequel
 
         db.create_table(:a2s) do
           foreign_key :id, :rts, primary_key: true
-          String :a2, null: false
+          String :a2
           String :ax
         end
 
@@ -103,30 +103,32 @@ module Sequel
 
       describe 'INSERT' do
 
-        let(:rt) { RT.create(rt: 'A').reload }
-        let(:a1) { A1.create(rt: 'B', a1: 'C', ax: 'X').reload }
-        let(:b1) { B1.create(rt: 'D', a1: 'E', b1: 'F').reload }
-
         it 'creates instances with the correct type value' do
-          assert_equal 1, rt.fk
-          assert_equal 2, a1.fk
+          assert_equal 1, RT.create(rt: 'A').fk
+          assert_equal 3, A2.create(rt: 'B').fk
         end
 
         context 'when base class' do
           it 'saves the instance attributes' do
+            rt = RT.create(rt: 'A')
             assert_equal 'A', rt.rt
           end
         end
 
         context 'when a subclass' do
 
-          it 'saves the attributes for each table' do
-            assert_equal 'D', b1.rt
-            assert_equal 'E', b1.a1
-            assert_equal 'F', b1.b1
+          it 'saves the correct attributes into each related table' do
+            b1 = B1.create(rt: 'X', a1: 'Y', b1: 'Z')
+            assert_equal ['X', 'Y', 'Z'], [b1.rt, b1.a1, b1.b1]
+          end
+
+          it 'inserts records for related tables even when all values are null' do
+            a2 = A2.create(rt: 'A').reload
+            assert_equal 'A', a2.rt
           end
 
           it 'does not insert records into unrelated tables of the tree' do
+            a1 = A1.create(rt: 'A', a1: 'C').reload
             assert_equal [], db[:a2s].where(:id => a1.pk).all
           end
 
