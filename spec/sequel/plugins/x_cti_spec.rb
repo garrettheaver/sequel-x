@@ -136,6 +136,17 @@ module Sequel
 
       end
 
+      describe 'UPDATE' do
+
+        let(:b1) { B1.create(rt: 'D', a1: 'E', b1: 'F') }
+
+        it 'updates the attributes in the associated tables' do
+          b1.update(rt: 'G', a1: 'H', b1: 'I').reload
+          assert_equal ['G', 'H', 'I'], [b1.rt, b1.a1, b1.b1]
+        end
+
+      end
+
       describe 'DELETE' do
 
         let(:b1) { B1.create(rt: 'D', a1: 'E', b1: 'F').delete }
@@ -144,22 +155,6 @@ module Sequel
           assert_equal [], db[:rts].where(:id => b1.pk).all
           assert_equal [], db[:a1s].where(:id => b1.pk).all
           assert_equal [], db[:b1s].where(:id => b1.pk).all
-        end
-
-      end
-
-      describe 'UPDATE' do
-
-        let(:b1) { B1.create(rt: 'D', a1: 'E', b1: 'F') }
-
-        before(:each) do
-          b1.update(rt: 'G', a1: 'H', b1: 'I').reload
-        end
-
-        it 'updates the attributes in the associated tables' do
-          assert_equal 'G', b1.rt
-          assert_equal 'H', b1.a1
-          assert_equal 'I', b1.b1
         end
 
       end
