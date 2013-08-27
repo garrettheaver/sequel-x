@@ -4,6 +4,7 @@ module Sequel
 
       def self.apply(model, opts={})
         model.plugin :lazy_attributes
+        model.plugin :dirty
       end
 
       def self.configure(model, opts={})
@@ -72,7 +73,7 @@ module Sequel
         def _update(columns)
           cti[:tables].keys.reverse.each do |tbl|
             col = cti[:tables][tbl]
-            val = values.select{ |k,v| col.include?(k) }
+            val = values.select{ |k,v| column_changed?(k) && col.include?(k) }
             model.db.from(tbl).where(primary_key => pk).
               update(val) unless val.empty?
           end
