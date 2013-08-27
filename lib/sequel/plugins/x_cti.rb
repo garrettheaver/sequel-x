@@ -13,8 +13,8 @@ module Sequel
 
         model.instance_eval do
           dataset.row_proc = lambda do |row|
-            key, map = cti[:key], cti[:map]
-            constantize(map[row[key]]).call(row)
+            key, models = cti[:key], cti[:models]
+            constantize(models[row[key]]).call(row)
           end
         end
       end
@@ -46,7 +46,7 @@ module Sequel
       module InstanceMethods
 
         def before_create
-          key, inv = cti[:key], cti[:map].invert
+          key, inv = cti[:key], cti[:models].invert
           send("#{key}=", inv[model] || inv[model.name])
           super
         end

@@ -11,46 +11,57 @@ module Sequel
       #     /
       #    B1
 
+      def self.build_tables(db)
+
+        db.create_table(:rts) do
+          primary_key :id, auto_increment: false
+          Integer :fk, null: false
+          String :rt, null: false
+        end
+
+        db.create_table(:a1s) do
+          foreign_key :id, :rts, primary_key: true
+          String :a1, null: false
+          String :ax
+        end
+
+        db.create_table(:a2s) do
+          foreign_key :id, :rts, primary_key: true
+          String :a2, null: false
+          String :ax
+        end
+
+        db.create_table(:b1s) do
+          foreign_key :id, :a1s, primary_key: true
+          String :b1, null: false
+        end
+
+      end
+
+      def self.build_models(db)
+
+        db[:rts].insert({ id: 1, fk: 1, rt: 'RT' })
+        db[:rts].insert({ id: 2, fk: 2, rt: 'A1' })
+        db[:rts].insert({ id: 3, fk: 3, rt: 'A2' })
+        db[:rts].insert({ id: 4, fk: 4, rt: 'B1' })
+
+        db[:a1s].insert({ id: 2, a1: 'A1' })
+        db[:a1s].insert({ id: 4, a1: 'A1' })
+
+        db[:a2s].insert({ id: 3, a2: 'A2' })
+
+        db[:b1s].insert({ id: 4, b1: 'B1' })
+
+      end
+
       db = Sequel.sqlite
 
-      db.create_table(:rts) do
-        primary_key :id, auto_increment: false
-        Integer :fk, null: false
-        String :rt, null: false
-      end
-
-      db[:rts].insert({ id: 1, fk: 1, rt: 'RT' })
-      db[:rts].insert({ id: 2, fk: 2, rt: 'A1' })
-      db[:rts].insert({ id: 3, fk: 3, rt: 'A2' })
-      db[:rts].insert({ id: 4, fk: 4, rt: 'B1' })
-
-      db.create_table(:a1s) do
-        foreign_key :id, :rts, primary_key: true
-        String :a1, null: false
-        String :ax
-      end
-
-      db[:a1s].insert({ id: 2, a1: 'A1' })
-      db[:a1s].insert({ id: 4, a1: 'A1' })
-
-      db.create_table(:a2s) do
-        foreign_key :id, :rts, primary_key: true
-        String :a2, null: false
-        String :ax
-      end
-
-      db[:a2s].insert({ id: 3, a2: 'A2' })
-
-      db.create_table(:b1s) do
-        foreign_key :id, :a1s, primary_key: true
-        String :b1, null: false
-      end
-
-      db[:b1s].insert({ id: 4, b1: 'B1' })
+      build_tables(db)
+      build_models(db)
 
       class ::RT < Sequel::Model(db)
         plugin :x_cti, key: :fk,
-          map: { 1 => self, 2 => 'A1', 3 => 'A2', 4 => 'B1' }
+          models: { 1 => self, 2 => 'A1', 3 => 'A2', 4 => 'B1' }
       end
 
       class ::A1 < RT; end
