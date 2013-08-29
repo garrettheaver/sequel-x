@@ -43,6 +43,10 @@ module Sequel
           super
         end
 
+        def table_name
+          @cti ? @cti[:tables].keys.last : super
+        end
+
       end
 
       module InstanceMethods

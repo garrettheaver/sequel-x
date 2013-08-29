@@ -68,6 +68,18 @@ module Sequel
       class ::A2 < RT; end
       class ::B1 < A1; end
 
+      describe 'config' do
+
+        it 'maintains the base model table name' do
+          assert_equal :rts, RT::table_name
+        end
+
+        it 'overrides the model table name in subclasses' do
+          assert_equal :b1s, B1::table_name
+        end
+
+      end
+
       describe 'SELECT' do
 
         context 'via base class' do
