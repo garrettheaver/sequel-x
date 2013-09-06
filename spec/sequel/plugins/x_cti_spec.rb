@@ -70,12 +70,9 @@ module Sequel
 
       describe 'config' do
 
-        it 'maintains the base model table name' do
+        it 'inherits the base table name for association compatibility' do
           assert_equal :rts, RT::table_name
-        end
-
-        it 'overrides the model table name in subclasses' do
-          assert_equal :b1s, B1::table_name
+          assert_equal :rts, B1::table_name
         end
 
       end
