@@ -11,9 +11,11 @@ module Sequel
         tbl = model.table_name
         col = model.dataset.db.from(tbl).columns
 
-        cti = { base: model, tables: { tbl => col } }.merge(opts)
-        model.instance_variable_set(:@cti, cti)
+        cti = { base: model,
+                tables: { tbl => col },
+                invert: opts[:models].invert }.merge(opts)
 
+        model.instance_variable_set(:@cti, cti)
         model.instance_eval do
           dataset.row_proc = lambda do |row|
             key, models = cti[:key], cti[:models]
@@ -48,8 +50,9 @@ module Sequel
       module InstanceMethods
 
         def before_create
-          key, inv = cti[:key], cti[:models].invert
-          send("#{key}=", inv[model] || inv[model.name])
+          key, inv = cti[:key], cti[:invert]
+          send("#{key}=", inv[model.name] ||
+               inv["::#{model.name}"] || inv[model])
           super
         end
 
@@ -73,7 +76,11 @@ module Sequel
         def _update(columns)
           cti[:tables].keys.reverse.each do |tbl|
             col = cti[:tables][tbl]
-            val = values.select{ |k,v| column_changed?(k) && col.include?(k) }
+
+            val = values.select do |k,v|
+              column_changed?(k) && col.include?(k)
+            end
+
             model.db.from(tbl).where(primary_key => pk).
               update(val) unless val.empty?
           end

@@ -61,12 +61,15 @@ module Sequel
 
       class ::RT < Sequel::Model(db)
         plugin :x_cti, key: :fk,
-          models: { 1 => self, 2 => 'A1', 3 => 'A2', 4 => 'B1' }
+          models: { 1 => self,
+                    2 => 'A1',
+                    3 => '::A2',
+                    4 => 'Sequel::Plugins::B1' }
       end
 
       class ::A1 < RT; end
       class ::A2 < RT; end
-      class ::B1 < A1; end
+      class B1 < ::A1; end
 
       describe 'config' do
 
@@ -131,7 +134,7 @@ module Sequel
             assert_equal ['X', 'Y', 'Z'], [b1.rt, b1.a1, b1.b1]
           end
 
-          it 'inserts records for related tables even when all values are null' do
+          it 'inserts records for related tables even when values are nil' do
             a2 = A2.create(rt: 'A').reload
             assert_equal 'A', a2.rt
           end
