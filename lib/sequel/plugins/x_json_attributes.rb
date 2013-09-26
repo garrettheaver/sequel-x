@@ -10,12 +10,12 @@ module Sequel
 
       module ClassMethods
 
-        def json_accessor(name, type)
+        def json_accessor(name, type=Object)
           json_getter(name, type)
-          json_setter(name, type)
+          json_setter(name)
         end
 
-        def json_getter(name, type)
+        def json_getter(name, type=Object)
           define_method(name) do
             column = self.class.class_variable_get(:@@xja)[:column]
             return nil unless values[column]
@@ -32,7 +32,7 @@ module Sequel
           end
         end
 
-        def json_setter(name, type)
+        def json_setter(name)
           define_method("#{name}=") do |setv|
             column = self.class.class_variable_get(:@@xja)[:column]
 

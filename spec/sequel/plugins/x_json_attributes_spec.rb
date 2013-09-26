@@ -30,6 +30,14 @@ module Sequel
           assert_equal false, subject.respond_to?('location')
         end
 
+        it 'allows accessors without a specific type' do
+          expect{ JsonAttributesA.json_accessor :lastname }.to_not raise_error
+        end
+
+        it 'allows getters without a specific type' do
+          expect{ JsonAttributesA.json_getter :address }.to_not raise_error
+        end
+
       end
 
       context Object do
