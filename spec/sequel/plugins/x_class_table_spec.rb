@@ -1,9 +1,9 @@
 require 'spec_helper'
-require 'sequel/plugins/x_cti'
+require 'sequel/plugins/x_class_table'
 
 module Sequel
   module Plugins
-    describe XCti do
+    describe XClassTable do
 
       #        RT
       #       /  \
@@ -60,7 +60,7 @@ module Sequel
       build_models(db)
 
       class ::RT < Sequel::Model(db)
-        plugin :x_cti, key: :fk,
+        plugin :x_class_table, key: :fk,
           models: { 1 => self,
                     2 => 'A1',
                     3 => '::A2',
