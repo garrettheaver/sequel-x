@@ -42,6 +42,11 @@ module Sequel
             to_not raise_error
         end
 
+        it 'allows setter without a specific converter' do
+          expect{ PgJsonAttrA.json_setter :address }.
+            to_not raise_error
+        end
+
       end
 
       describe '#before_save' do
@@ -73,6 +78,28 @@ module Sequel
           it 'sets the key to the given value' do
             subject.forename = 'Garrett'
             assert_equal 'Garrett', subject.forename
+          end
+        end
+
+      end
+
+      context Proc do
+
+        before(:all) do
+          PgJsonAttrA.json_accessor :hostname, -> u { u.host }, -> v { URI(v) }
+        end
+
+        describe 'setter' do
+          it 'stores values using the output of the setter lambda' do
+            subject.hostname = URI('http://www.iterationfour.com/about')
+            assert_equal 'www.iterationfour.com', subject.values[:nosql][:hostname]
+          end
+        end
+
+        describe 'getter' do
+          it 'returns the value using the output of the getter lambda' do
+            subject.values[:nosql] = { hostname: 'www.iterationfour.com' }
+            assert_equal URI('www.iterationfour.com'), subject.hostname
           end
         end
 
