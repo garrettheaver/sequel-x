@@ -1,6 +1,10 @@
 module Sequel
   module Plugins
-    class XJsonAttributes
+    class XPgJsonAttr
+
+      def self.apply(model, opts={})
+        model.db.extension :pg_json
+      end
 
       def self.configure(model, column)
         model.class_variable_set(:@@xja, {
@@ -45,6 +49,15 @@ module Sequel
 
             values[column] = (values[column] ||= {}).merge(name => colv)
           end
+        end
+
+      end
+
+      module InstanceMethods
+
+        def before_save
+          column = self.class.class_variable_get(:@@xja)[:column]
+          values[column] = Sequel.pg_json(values[column]) if values[column]
         end
 
       end

@@ -1,20 +1,22 @@
 require 'spec_helper'
-require 'sequel/plugins/x_json_attributes'
+require 'sequel/plugins/x_pg_json_attr'
 
 module Sequel
   module Plugins
-    describe XJsonAttributes do
+    describe XPgJsonAttr do
 
-      class JsonAttributesA < Sequel::Model
-        plugin :x_json_attributes, :nosql
+      db = Sequel.connect('mock://postgres')
+
+      class PgJsonAttrA < Sequel::Model(db)
+        plugin :x_pg_json_attr, :nosql
         json_accessor :forename, String
       end
 
-      class JsonAttributesB < JsonAttributesA
+      class PgJsonAttrB < PgJsonAttrA
         json_accessor :location, String
       end
 
-      subject { JsonAttributesA.new }
+      subject { PgJsonAttrA.new }
 
       describe '::json_accessors' do
 
@@ -31,11 +33,30 @@ module Sequel
         end
 
         it 'allows accessors without a specific type' do
-          expect{ JsonAttributesA.json_accessor :lastname }.to_not raise_error
+          expect{ PgJsonAttrA.json_accessor :lastname }.
+            to_not raise_error
         end
 
         it 'allows getters without a specific type' do
-          expect{ JsonAttributesA.json_getter :address }.to_not raise_error
+          expect{ PgJsonAttrA.json_getter :address }.
+            to_not raise_error
+        end
+
+      end
+
+      describe '#before_save' do
+
+        it 'saves even if the attribute hash is nil' do
+          subject.values[:nosql] = nil
+          expect{ subject.before_save }.to_not raise_error
+        end
+
+        it 'converts the attribute hash to a json hash' do
+          subject.values[:nosql] = { forename: 'Garrett' }
+          subject.before_save
+
+          assert_equal Sequel::Postgres::JSONHash,
+            subject.values[:nosql].class
         end
 
       end
@@ -60,7 +81,7 @@ module Sequel
       context Time do
 
         before(:all) do
-          JsonAttributesA.json_accessor :issued_at, Time
+          PgJsonAttrA.json_accessor :issued_at, Time
         end
 
         describe 'setter' do
@@ -82,7 +103,7 @@ module Sequel
       context BigDecimal do
 
         before(:all) do
-          JsonAttributesA.json_accessor :balance, BigDecimal
+          PgJsonAttrA.json_accessor :balance, BigDecimal
         end
 
         describe 'setters' do
@@ -104,7 +125,7 @@ module Sequel
       context Date do
 
         before(:all) do
-          JsonAttributesA.json_accessor :born_on, Date
+          PgJsonAttrA.json_accessor :born_on, Date
         end
 
         describe 'setters' do
