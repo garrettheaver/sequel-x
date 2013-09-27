@@ -24,7 +24,7 @@ module Sequel
             column = self.class.class_variable_get(:@@xja)[:column]
 
             return nil unless values[column]
-            colv = values[column][name]
+            colv = values[column][name] || values[column][name.to_s]
 
             retv = if Proc === getter
                      getter.call(colv)

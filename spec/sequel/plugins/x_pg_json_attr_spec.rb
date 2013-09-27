@@ -57,7 +57,7 @@ module Sequel
         end
 
         it 'converts the attribute hash to a json hash' do
-          subject.values[:nosql] = { forename: 'Garrett' }
+          subject.values[:nosql] = { 'forename' => 'Garrett' }
           subject.before_save
 
           assert_equal Sequel::Postgres::JSONHash,
@@ -98,7 +98,7 @@ module Sequel
 
         describe 'getter' do
           it 'returns the value using the output of the getter lambda' do
-            subject.values[:nosql] = { hostname: 'www.iterationfour.com' }
+            subject.values[:nosql] = { 'hostname' => 'www.iterationfour.com' }
             assert_equal URI('www.iterationfour.com'), subject.hostname
           end
         end
@@ -120,7 +120,7 @@ module Sequel
 
         describe 'getter' do
           it 'returns the value as a time object' do
-            subject.values[:nosql] = { issued_at: 1 }
+            subject.values[:nosql] = { 'issued_at' => 1 }
             assert_equal Time.new(1970, 1, 1, 1, 0, 1), subject.issued_at
           end
         end
@@ -142,7 +142,7 @@ module Sequel
 
         describe 'getters' do
           it 'returns the value as a big decimal object' do
-            subject.values[:nosql] = { balance: '0.9999E2' }
+            subject.values[:nosql] = { 'balance' => '0.9999E2' }
             assert_equal BigDecimal.new('99.99'), subject.balance
           end
         end
@@ -164,7 +164,7 @@ module Sequel
 
         describe 'getters' do
           it 'returns the value as a date object' do
-            subject.values[:nosql] = { born_on: 2456294 }
+            subject.values[:nosql] = { 'born_on' => 2456294 }
             assert_equal Date.new(2013, 1, 1), subject.born_on
           end
         end
