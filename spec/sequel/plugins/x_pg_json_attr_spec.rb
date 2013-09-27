@@ -37,14 +37,34 @@ module Sequel
             to_not raise_error
         end
 
+      end
+
+      describe '::json_getter' do
+
         it 'allows getters without a specific type' do
           expect{ PgJsonAttrA.json_getter :address }.
             to_not raise_error
         end
 
+        it 'allows getters with a specific type' do
+          PgJsonAttrA.json_getter :getter_at, Time
+          subject.values[:nosql] = { 'getter_at' => 1 }
+          assert_equal Time.at(1), subject.getter_at
+        end
+
+      end
+
+      describe '::json_setter' do
+
         it 'allows setter without a specific converter' do
           expect{ PgJsonAttrA.json_setter :address }.
             to_not raise_error
+        end
+
+        it 'allows setters with a specific type' do
+          PgJsonAttrA.json_setter :setter_at, Time
+          subject.setter_at = Time.at(1)
+          assert_equal 1, subject.values[:nosql]['setter_at']
         end
 
       end
@@ -92,7 +112,7 @@ module Sequel
         describe 'setter' do
           it 'stores values using the output of the setter lambda' do
             subject.hostname = URI('http://www.iterationfour.com/about')
-            assert_equal 'www.iterationfour.com', subject.values[:nosql][:hostname]
+            assert_equal 'www.iterationfour.com', subject.values[:nosql]['hostname']
           end
         end
 
@@ -114,7 +134,7 @@ module Sequel
         describe 'setter' do
           it 'stores times as ints in unix format' do
             subject.issued_at = Time.new(1970, 1, 1, 1, 0, 1)
-            assert_equal 1, subject.values[:nosql][:issued_at]
+            assert_equal 1, subject.values[:nosql]['issued_at']
           end
         end
 
@@ -136,7 +156,7 @@ module Sequel
         describe 'setters' do
           it 'stores big decimals as strings in E notation' do
             subject.balance = BigDecimal.new('99.99')
-            assert_equal '0.9999E2', subject.values[:nosql][:balance]
+            assert_equal '0.9999E2', subject.values[:nosql]['balance']
           end
         end
 
@@ -158,7 +178,7 @@ module Sequel
         describe 'setters' do
           it 'stores dates as ints in julian format' do
             subject.born_on = Date.new(2013, 1, 1)
-            assert_equal 2456294, subject.values[:nosql][:born_on]
+            assert_equal 2456294, subject.values[:nosql]['born_on']
           end
         end
 

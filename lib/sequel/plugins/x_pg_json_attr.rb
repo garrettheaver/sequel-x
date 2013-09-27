@@ -8,7 +8,19 @@ module Sequel
 
       def self.configure(model, column)
         model.class_variable_set(:@@xja, {
-          column: column
+          column: column,
+
+          getters: {
+            Time => -> v { Time.at(v) },
+            BigDecimal => -> v { BigDecimal.new(v) },
+            Date => -> v { Date.jd(v) }
+          },
+
+          setters: {
+            Time => -> t { t.to_i },
+            BigDecimal => -> d { d.to_s },
+            Date => -> d { d.jd }
+          }
         })
       end
 
@@ -21,42 +33,27 @@ module Sequel
 
         def json_getter(name, getter=nil)
           define_method(name) do
-            column = self.class.class_variable_get(:@@xja)[:column]
+            config = self.class.class_variable_get(:@@xja)
+
+            getter = config[:getters][getter] || getter
+            column = config[:column]
 
             return nil unless values[column]
-            colv = values[column][name] || values[column][name.to_s]
+            colv = values[column][name.to_s]
 
-            retv = if Proc === getter
-                     getter.call(colv)
-                   else
-                     case getter.__id__
-                     when Time.__id__ then Time.at(colv)
-                     when BigDecimal.__id__ then BigDecimal.new(colv)
-                     when Date.__id__ then Date.jd(colv)
-                     else colv
-                     end
-                   end
-
-            retv
+            Proc === getter ? getter.call(colv) : colv
           end
         end
 
         def json_setter(name, setter=nil)
           define_method("#{name}=") do |setv|
-            column = self.class.class_variable_get(:@@xja)[:column]
+            config = self.class.class_variable_get(:@@xja)
 
-            colv = if Proc === setter
-                     setter.call(setv)
-                   else
-                     case setv
-                     when Time then setv.to_i
-                     when BigDecimal then setv.to_s
-                     when Date then setv.jd
-                     else setv
-                     end
-                   end
+            setter = config[:setters][setter] || setter
+            column = config[:column]
 
-            values[column] = (values[column] ||= {}).merge(name => colv)
+            colv = Proc === setter ? setter.call(setv) : setv
+            values[column] = (values[column] ||= {}).merge(name.to_s => colv)
           end
         end
 
