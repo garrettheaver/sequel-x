@@ -132,16 +132,16 @@ module Sequel
         end
 
         describe 'setter' do
-          it 'stores times as ints in unix format' do
-            subject.issued_at = Time.new(1970, 1, 1, 1, 0, 1)
-            assert_equal 1, subject.values[:nosql]['issued_at']
+          it 'stores times as floats in unix format' do
+            subject.issued_at = Time.at(1.1)
+            assert_equal 1.1, subject.values[:nosql]['issued_at']
           end
         end
 
         describe 'getter' do
           it 'returns the value as a time object' do
-            subject.values[:nosql] = { 'issued_at' => 1 }
-            assert_equal Time.new(1970, 1, 1, 1, 0, 1), subject.issued_at
+            subject.values[:nosql] = { 'issued_at' => 1.1 }
+            assert_equal Time.at(1.1), subject.issued_at
           end
         end
 

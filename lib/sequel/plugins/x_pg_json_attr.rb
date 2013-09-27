@@ -17,7 +17,7 @@ module Sequel
           },
 
           setters: {
-            Time => -> t { t.to_i },
+            Time => -> t { t.to_f },
             BigDecimal => -> d { d.to_s },
             Date => -> d { d.jd }
           }
