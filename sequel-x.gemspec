@@ -5,9 +5,9 @@ Gem::Specification.new do |s|
   s.summary = 'library of custom sequel plugins'
   s.description = 'plugins which extend native sequel behaviour'
   s.authors = ['Garrett Heaver']
-  s.email = 'garrett@iterationfour.com'
+  s.email = 'open.source@iterationfour.com'
   s.homepage = 'https://github.com/garrettheaver/sequel-x'
-  s.license = 'IterationFour Proprietary'
+  s.license = 'MIT'
   s.add_runtime_dependency 'sequel'
   s.files = Dir.glob('lib/**/*')
 end
