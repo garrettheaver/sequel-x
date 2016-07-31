@@ -1,6 +1,5 @@
 ## Sequel-X
-
-[![Build Status](https://travis-ci.org/garrettheaver/sequel-x.png)](https://travis-ci.org/garrettheaver/sequel-x)
+[![Build Status](https://travis-ci.org/garrettheaver/sequel-x.svg?branch=master)](https://travis-ci.org/garrettheaver/sequel-x)
 
 Extending Ruby 'sequel' gem behaviours, usually for use with PostgreSQL.
 
